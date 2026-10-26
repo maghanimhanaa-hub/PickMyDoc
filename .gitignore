@@ -1,2 +1,42 @@
-.venv/
+# PyCharm
 .idea/
+
+# Environnement virtuel
+.venv/
+venv/
+env/
+ENV/
+
+# Python
+__pycache__/
+*.py[codz]
+*$py.class
+
+# Variables d'environnement et secrets
+.env
+.envrc
+
+# Bases de données temporaires
+db.sqlite3
+db.sqlite3-journal
+
+# Packaging
+build/
+dist/
+*.egg-info/
+
+# Tests et cache
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Fichiers temporaires
+tempCodeRunnerFile.py
