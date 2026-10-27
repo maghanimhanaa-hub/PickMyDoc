@@ -1,4 +1,3 @@
-
 class Consultation:
     def __init__(self, patient, medecin, date, heure):
         self.patient = patient
