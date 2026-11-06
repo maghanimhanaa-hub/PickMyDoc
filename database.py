@@ -110,6 +110,17 @@ def lister_consultations():
         "WHERE c.id_patient = p.id_patient AND c.id_medecin = m.id_medecin "
         "ORDER BY c.date_consultation, c.heure_consultation", lire=True)
 
+def details_consultation(id_consultation):
+    """Retourne toutes les infos d'une consultation (patient, médecin, date, heure, statut)."""
+    lignes = executer(
+        "SELECT p.nom, p.prenom, p.telephone, p.email, "
+        "m.nom, m.prenom, m.specialite, m.telephone, m.ville, m.tarif, "
+        "c.date_consultation, c.heure_consultation, c.statut "
+        "FROM Consultation c, Patient p, Medecin m "
+        "WHERE c.id_patient = p.id_patient AND c.id_medecin = m.id_medecin "
+        "AND c.id_consultation = ?", (id_consultation,), lire=True)
+    return lignes[0] if lignes else None
+
 def creneau_disponible(id_medecin, date, heure, ignorer=-1):
     n = executer("SELECT COUNT(*) FROM Consultation "
                  "WHERE id_medecin=? AND date_consultation=? AND heure_consultation=? "

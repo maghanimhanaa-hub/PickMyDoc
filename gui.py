@@ -4,6 +4,9 @@ from tkinter import ttk, messagebox
 from datetime import datetime
 
 import database as db
+from models.patient import Patient
+from models.medecin import Medecin
+from models.consultation import Consultation
 
 
 class PageCRUD(ttk.Frame):
@@ -189,7 +192,8 @@ class PageConsultations(ttk.Frame):
         boutons.grid(row=4, column=0, columnspan=2, pady=8)
         for texte, cmd in [("Réserver", self.reserver), ("Modifier l'horaire", self.modifier_horaire),
                            ("Annuler", lambda: self.statut("Annulée")),
-                           ("Marquer terminée", lambda: self.statut("Terminée"))]:
+                           ("Marquer terminée", lambda: self.statut("Terminée")),
+                           ("Détails", self.afficher_details)]:
             ttk.Button(boutons, text=texte, command=cmd).pack(side="left", padx=5)
 
         cols = ("patient", "medecin", "specialite", "date", "heure", "statut")
@@ -260,12 +264,30 @@ class PageConsultations(ttk.Frame):
             else:
                 messagebox.showerror("Indisponible", "Ce créneau est déjà pris.")
 
+    def afficher_details(self):
+        """Construit des objets Patient, Medecin et Consultation à partir de la base."""
+        id_c = self.selection()
+        if not id_c:
+            return
+        d = db.details_consultation(id_c)
+        if d is None:
+            messagebox.showerror("Erreur", "Consultation introuvable.")
+            return
+        patient = Patient(d[0], d[1], d[2], d[3])
+        medecin = Medecin(d[4], d[5], d[6], d[7], d[8], d[9])
+        consultation = Consultation(patient, medecin, d[10], d[11])
+        consultation.statut = d[12]
+        texte = (f"=== PATIENT ===\n{patient.afficher_informations()}\n\n"
+                 f"=== MÉDECIN ===\n{medecin.afficher_informations()}\n\n"
+                 f"=== CONSULTATION ===\n{consultation.afficher_informations()}")
+        messagebox.showinfo("Détails de la consultation", texte)
+
 
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("PickMyDoc - Gestion des consultations")
-        self.geometry("950x600")
+        self.geometry("1000x600")
 
         onglets = ttk.Notebook(self)
         onglets.pack(fill="both", expand=True)
