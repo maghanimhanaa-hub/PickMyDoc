@@ -46,6 +46,8 @@ def creer_base_de_donnees():
 
     connexion.commit()
     connexion.close()
+
+
 def executer(sql, params=(), lire=False):
     connexion = sqlite3.connect(DB)
     connexion.execute("PRAGMA foreign_keys = ON")
@@ -78,6 +80,13 @@ def supprimer_patient(id_patient):
 def lister_medecins():
     return executer("SELECT id_medecin, nom, prenom, specialite, telephone, ville, tarif "
                     "FROM Medecin ORDER BY nom", lire=True)
+
+def rechercher_medecins(nom="", specialite="", ville=""):
+    return executer(
+        "SELECT id_medecin, nom, prenom, specialite, telephone, ville, tarif "
+        "FROM Medecin WHERE nom LIKE ? AND specialite LIKE ? AND ville LIKE ? "
+        "ORDER BY nom",
+        (f"%{nom}%", f"%{specialite}%", f"%{ville}%"), lire=True)
 
 def ajouter_medecin(nom, prenom, specialite, telephone, ville, tarif):
     executer("INSERT INTO Medecin (nom, prenom, specialite, telephone, ville, tarif) "

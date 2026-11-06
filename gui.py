@@ -42,10 +42,14 @@ class PageCRUD(ttk.Frame):
         self.table.bind("<<TreeviewSelect>>", self.remplir)
         self.charger()
 
+    def donnees(self):
+        """Lignes à afficher (peut être redéfinie, par exemple pour filtrer)."""
+        return self.f_lister()
+
     def charger(self):
         self.table.delete(*self.table.get_children())
         self.lignes = {}
-        for row in self.f_lister():
+        for row in self.donnees():
             iid = str(row[0])
             self.lignes[iid] = row
             self.table.insert("", "end", iid=iid, values=row[1:])
@@ -115,6 +119,50 @@ class PageCRUD(ttk.Frame):
             messagebox.showerror("Impossible", "Des consultations sont liées à cet enregistrement.")
             return
         self.termine()
+
+
+class PageMedecins(PageCRUD):
+    """Page Médecins : CRUD + recherche par nom, spécialité et ville."""
+
+    filtres = None   # None = pas de filtre, sinon dict {nom, specialite, ville}
+
+    def __init__(self, parent, apres_changement=None):
+        super().__init__(
+            parent, "Médecin",
+            [("nom", "Nom"), ("prenom", "Prénom"), ("specialite", "Spécialité"),
+             ("telephone", "Téléphone"), ("ville", "Ville"), ("tarif", "Tarif (DH)")],
+            db.lister_medecins, db.ajouter_medecin, db.modifier_medecin, db.supprimer_medecin,
+            numeriques=("tarif",), apres_changement=apres_changement)
+
+        # Barre de recherche, placée entre le formulaire et le tableau
+        recherche = ttk.LabelFrame(self, text="Rechercher un médecin", padding=10)
+        recherche.pack(fill="x", before=self.table)
+        self.rech = {}
+        for i, (cle, libelle) in enumerate([("nom", "Nom"), ("specialite", "Spécialité"), ("ville", "Ville")]):
+            ttk.Label(recherche, text=libelle + " :").grid(row=0, column=i * 2, sticky="w", padx=5)
+            e = ttk.Entry(recherche, width=16)
+            e.grid(row=0, column=i * 2 + 1, padx=5)
+            e.bind("<Return>", lambda _e: self.rechercher())
+            self.rech[cle] = e
+        ttk.Button(recherche, text="Rechercher", command=self.rechercher).grid(row=0, column=6, padx=5)
+        ttk.Button(recherche, text="Réinitialiser", command=self.reinitialiser).grid(row=0, column=7, padx=5)
+
+    def donnees(self):
+        if self.filtres:
+            return db.rechercher_medecins(**self.filtres)
+        return self.f_lister()
+
+    def rechercher(self):
+        self.filtres = {cle: e.get().strip() for cle, e in self.rech.items()}
+        self.charger()
+        if not self.lignes:
+            messagebox.showinfo("Recherche", "Aucun médecin ne correspond à ta recherche.")
+
+    def reinitialiser(self):
+        for e in self.rech.values():
+            e.delete(0, "end")
+        self.filtres = None
+        self.charger()
 
 
 class PageConsultations(ttk.Frame):
@@ -217,7 +265,7 @@ class App(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title("PickMyDoc - Gestion des consultations")
-        self.geometry("950x560")
+        self.geometry("950x600")
 
         onglets = ttk.Notebook(self)
         onglets.pack(fill="both", expand=True)
@@ -227,12 +275,7 @@ class App(tk.Tk):
             [("nom", "Nom"), ("prenom", "Prénom"), ("telephone", "Téléphone"), ("email", "Email")],
             db.lister_patients, db.ajouter_patient, db.modifier_patient, db.supprimer_patient,
             optionnels=("email",), apres_changement=lambda: consultations.charger_choix())
-        medecins = PageCRUD(
-            onglets, "Médecin",
-            [("nom", "Nom"), ("prenom", "Prénom"), ("specialite", "Spécialité"),
-             ("telephone", "Téléphone"), ("ville", "Ville"), ("tarif", "Tarif (DH)")],
-            db.lister_medecins, db.ajouter_medecin, db.modifier_medecin, db.supprimer_medecin,
-            numeriques=("tarif",), apres_changement=lambda: consultations.charger_choix())
+        medecins = PageMedecins(onglets, apres_changement=lambda: consultations.charger_choix())
         consultations = PageConsultations(onglets)
 
         onglets.add(patients, text="Patients")
