@@ -1,19 +1,17 @@
-
-from models.personne import Personne
-
-
-class Medecin(Personne):
-    def __init__(self, nom, telephone, specialite, ville, tarif):
-        super().__init__(nom, telephone)
+class Medecin:
+    def __init__(self, nom, prenom, specialite, telephone, ville, tarif):
+        self.nom = nom
+        self.prenom = prenom
         self.specialite = specialite
+        self.telephone = telephone
         self.ville = ville
         self.tarif = tarif
-
     def afficher_informations(self):
-        informations = super().afficher_informations()
         return (
-            f"{informations}\n"
+            f"Nom : {self.nom}\n"
+            f"Prénom : {self.prenom}\n"
             f"Spécialité : {self.specialite}\n"
+            f"Téléphone : {self.telephone}\n"
             f"Ville : {self.ville}\n"
             f"Tarif : {self.tarif} DH"
         )

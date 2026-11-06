@@ -2,22 +2,11 @@ from models.medecin import Medecin
 from models.patient import Patient
 from models.consultation import Consultation
 # Création d'un médecin
-medecin1 = Medecin(
-    "Dr Amine",
-    "0612345678",
-    "Cardiologie",
-    "Casablanca",
-    300
-)
+medecin1 = Medecin("Amine", "Karim", "Cardiologie", "0612345678", "Casablanca", 300)
 # Création d'un patient
-patient1 = Patient("Sara", "0623456789")
+patient1 = Patient("Alaoui", "Sara", "0623456789")
 # Création d'une consultation
-consultation1 = Consultation(
-    patient1,
-    medecin1,
-    "28/10/2026",
-    "10:30"
-)
+consultation1 = Consultation(patient1, medecin1, "2026-11-10", "10:30")
 # Afficher les informations
 print("=== MÉDECIN ===")
 print(medecin1.afficher_informations())
